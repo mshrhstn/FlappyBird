@@ -17,8 +17,10 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
     
     // スコア用
     var score = 0
+    var itemScore = 0
     var scoreLabelNode:SKLabelNode!    // ←追加
     var bestScoreLabelNode:SKLabelNode!    // ←追加
+    var itemScoreLabelNode:SKLabelNode!
     let userDefaults:UserDefaults = UserDefaults.standard    // 追加
     
     // 衝突判定カテゴリー ↓追加
@@ -260,17 +262,10 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
             
             print(itemTexture.size().height)
             
+            item.physicsBody = SKPhysicsBody(rectangleOf: itemTexture.size())
+            item.physicsBody?.categoryBitMask = self.itemCategory
             
-            // スコアアップ用のノード
-            let scoreNode = SKNode()
-            scoreNode.position = CGPoint(x: item.size.width / 2, y: self.frame.height / 2)
-            scoreNode.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: item.size.width, height: self.frame.size.height))
-            //(rectangleOf: itemTexture.size())
-            scoreNode.physicsBody?.isDynamic = false
-            scoreNode.physicsBody?.categoryBitMask = self.scoreCategory
-            scoreNode.physicsBody?.contactTestBitMask = self.birdCategory
-
-            item.addChild(scoreNode)
+            item.physicsBody?.isDynamic = false
             
             item.run(wallAnimation)
 
@@ -308,9 +303,9 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
         bird.physicsBody?.allowsRotation = false    // ←追加
         
         // 衝突のカテゴリー設定
-        bird.physicsBody?.categoryBitMask = birdCategory    // ←追加
-        bird.physicsBody?.collisionBitMask = groundCategory | wallCategory    // ←追加
-        bird.physicsBody?.contactTestBitMask = groundCategory | wallCategory    // ←追加
+        bird.physicsBody?.categoryBitMask = birdCategory | itemCategory    // ←追加
+        bird.physicsBody?.collisionBitMask = groundCategory | wallCategory | itemCategory // ←追加
+        bird.physicsBody?.contactTestBitMask = groundCategory | wallCategory | itemCategory   // ←追加
 
         // アニメーションを設定
         bird.run(flap)
@@ -321,6 +316,7 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
     
     func setupScoreLabel() {
         score = 0
+        
         scoreLabelNode = SKLabelNode()
         scoreLabelNode.fontColor = UIColor.black
         scoreLabelNode.position = CGPoint(x: 10, y: self.frame.size.height - 60)
@@ -334,10 +330,20 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
         bestScoreLabelNode.position = CGPoint(x: 10, y: self.frame.size.height - 90)
         bestScoreLabelNode.zPosition = 100 // 一番手前に表示する
         bestScoreLabelNode.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.left
+        
+        itemScoreLabelNode = SKLabelNode()
+        itemScoreLabelNode.fontColor = UIColor.black
+        itemScoreLabelNode.position = CGPoint(x: 10, y: self.frame.size.height - 120)
+        itemScoreLabelNode.zPosition = 100 // 一番手前に表示する
+        itemScoreLabelNode.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.left
 
         let bestScore = userDefaults.integer(forKey: "BEST")
         bestScoreLabelNode.text = "Best Score:\(bestScore)"
         self.addChild(bestScoreLabelNode)
+        
+        let itemScore = userDefaults.integer(forKey: "ITEM")
+        itemScoreLabelNode.text = "Item Score:\(itemScore)"
+        self.addChild(itemScoreLabelNode)
     }
     
     func restart() {
@@ -374,7 +380,8 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
             return
         }
 
-        if (contact.bodyA.categoryBitMask & scoreCategory) == scoreCategory || (contact.bodyB.categoryBitMask & scoreCategory) == scoreCategory {
+        if (contact.bodyA.categoryBitMask & scoreCategory) == scoreCategory || (contact.bodyB.categoryBitMask & scoreCategory) == scoreCategory ||
+            (contact.bodyA.categoryBitMask & itemCategory) == itemCategory {
             // スコア用の物体と衝突した
             print("ScoreUp")
             score += 1
