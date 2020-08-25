@@ -26,6 +26,7 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
     let groundCategory: UInt32 = 1 << 1     // 0...00010
     let wallCategory: UInt32 = 1 << 2       // 0...00100
     let scoreCategory: UInt32 = 1 << 3      // 0...01000
+    let itemCategory: UInt32 = 1 << 4
     
     // SKView上にシーンが表示されたときに呼ばれるメソッド
     override func didMove(to view: SKView) {
@@ -233,8 +234,9 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
 
         
         }
+    
     func setupItem() {
-        // 壁の画像を読み込む
+        // アイテムの画像を読み込む
         let itemTexture = SKTexture(imageNamed: "item")
         itemTexture.filteringMode = .linear
         // 移動する距離を計算
@@ -251,29 +253,33 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
         
         let createItemAnimation = SKAction.run({
 
-            // 壁関連のノードを乗せるノードを作成
-            let item = SKNode()
-            item.position = CGPoint(x: self.frame.size.width + itemTexture.size().width / 2, y: 0)
-            item.zPosition = -50 // 雲より手前、地面より奥
-            // スコアアップ用のノード --- ここから ---
+            // アイテム関連のノードを乗せるノードを作成
+            let item = SKSpriteNode(texture: itemTexture)
+            item.position = CGPoint(x: self.frame.size.width + itemTexture.size().width / 2, y: 400)
+            item.zPosition = -60 // 雲より手前、地面より奥
+            
+            print(itemTexture.size().height)
+            
+            
+            // スコアアップ用のノード
             let scoreNode = SKNode()
-            scoreNode.position = CGPoint(x: 0, y: self.frame.height / 2)
-            scoreNode.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 50, height: self.frame.size.height))
+            scoreNode.position = CGPoint(x: item.size.width / 2, y: self.frame.height / 2)
+            scoreNode.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: item.size.width, height: self.frame.size.height))
+            //(rectangleOf: itemTexture.size())
             scoreNode.physicsBody?.isDynamic = false
             scoreNode.physicsBody?.categoryBitMask = self.scoreCategory
             scoreNode.physicsBody?.contactTestBitMask = self.birdCategory
 
             item.addChild(scoreNode)
-            // --- ここまで追加 ---
-
+            
             item.run(wallAnimation)
 
             self.itemNode.addChild(item)
             })
-        // 次の壁作成までの時間待ちのアクションを作成
-        let waitAnimation = SKAction.wait(forDuration: 2)
+        // 次のアイテム作成までの時間待ちのアクションを作成
+        let waitAnimation = SKAction.wait(forDuration: 3)
         
-        // 壁を作成->時間待ち->壁を作成を無限に繰り返すアクションを作成
+        // アイテムを作成->時間待ち->アイテムを作成を無限に繰り返すアクションを作成
         let repeatForeverAnimation = SKAction.repeatForever(SKAction.sequence([createItemAnimation, waitAnimation]))
 
         itemNode.run(repeatForeverAnimation)
