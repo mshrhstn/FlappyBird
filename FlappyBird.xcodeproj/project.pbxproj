@@ -14,6 +14,7 @@
 		094675A324E54D1900FF7248 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 094675A224E54D1900FF7248 /* Assets.xcassets */; };
 		094675A624E54D1900FF7248 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 094675A424E54D1900FF7248 /* LaunchScreen.storyboard */; };
 		094675AE24E5516700FF7248 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 094675AD24E5516700FF7248 /* GameScene.swift */; };
+		0947E86724F7F80A00851137 /* coin.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 0947E86624F7F80A00851137 /* coin.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		094675A524E54D1900FF7248 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		094675A724E54D1900FF7248 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		094675AD24E5516700FF7248 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
+		0947E86624F7F80A00851137 /* coin.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = coin.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				0946759D24E54D1800FF7248 /* ViewController.swift */,
 				0946759F24E54D1800FF7248 /* Main.storyboard */,
 				094675AD24E5516700FF7248 /* GameScene.swift */,
+				0947E86624F7F80A00851137 /* coin.mp3 */,
 				094675A224E54D1900FF7248 /* Assets.xcassets */,
 				094675A424E54D1900FF7248 /* LaunchScreen.storyboard */,
 				094675A724E54D1900FF7248 /* Info.plist */,
@@ -131,6 +134,7 @@
 				094675A624E54D1900FF7248 /* LaunchScreen.storyboard in Resources */,
 				094675A324E54D1900FF7248 /* Assets.xcassets in Resources */,
 				094675A124E54D1800FF7248 /* Main.storyboard in Resources */,
+				0947E86724F7F80A00851137 /* coin.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

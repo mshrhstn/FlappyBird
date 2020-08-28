@@ -7,13 +7,15 @@
 //
 
 import SpriteKit
+import AVFoundation
 
-class GameScene: SKScene , SKPhysicsContactDelegate {
+class GameScene: SKScene , SKPhysicsContactDelegate , AVAudioPlayerDelegate {
     
     var scrollNode:SKNode!
     var wallNode:SKNode!
     var bird:SKSpriteNode!
     var itemNode:SKNode!
+    var audioPlayer: AVAudioPlayer!
     
     // スコア用
     var score = 0
@@ -60,6 +62,22 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
         setupItem()
         setupScoreLabel()
         }
+    
+    func playsound() { //音を鳴らすための関数
+        if let path = Bundle.main.path(forResource: "coin", ofType: "mp3") {
+            do{
+                audioPlayer = try AVAudioPlayer(contentsOf: NSURL(fileURLWithPath: path) as URL, fileTypeHint: "mp3")
+                audioPlayer.play()
+            } catch {
+            }
+            
+            //if let sound = audioPlayer {
+                //sound.prepareToPlay()
+                //sound.play()
+            
+        }
+    }
+    
     
     func setupGround() {
         // 地面の画像を読み込む
@@ -303,8 +321,8 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
         bird.physicsBody?.allowsRotation = false    // ←追加
         
         // 衝突のカテゴリー設定
-        bird.physicsBody?.categoryBitMask = birdCategory | itemCategory    // ←追加
-        bird.physicsBody?.collisionBitMask = groundCategory | wallCategory | itemCategory // ←追加
+        bird.physicsBody?.categoryBitMask = birdCategory   // ←追加
+        bird.physicsBody?.collisionBitMask = groundCategory | wallCategory // ←追加
         bird.physicsBody?.contactTestBitMask = groundCategory | wallCategory | itemCategory   // ←追加
 
         // アニメーションを設定
@@ -380,21 +398,36 @@ class GameScene: SKScene , SKPhysicsContactDelegate {
             return
         }
 
-        if (contact.bodyA.categoryBitMask & scoreCategory) == scoreCategory || (contact.bodyB.categoryBitMask & scoreCategory) == scoreCategory ||
-            (contact.bodyA.categoryBitMask & itemCategory) == itemCategory {
+        if (contact.bodyA.categoryBitMask & scoreCategory) == scoreCategory || (contact.bodyB.categoryBitMask & scoreCategory) == scoreCategory
+            {
+                
+        // スコア用の物体と衝突した
+        print("ScoreUp")
+        score += 1
+        scoreLabelNode.text = "Score:\(score)"
+        
+        // ベストスコア更新か確認する --- ここから ---
+        var bestScore = userDefaults.integer(forKey: "BEST")
+        if score > bestScore {
+            bestScore = score
+            bestScoreLabelNode.text = "Best Score:\(bestScore)"
+            userDefaults.set(bestScore, forKey: "BEST")
+            userDefaults.synchronize()
+        }
+                
+        } else if (contact.bodyA.categoryBitMask & itemCategory) == itemCategory || (contact.bodyB.categoryBitMask & itemCategory) == itemCategory {
+            // アイテムと衝突した時のメソッド
+            
             // スコア用の物体と衝突した
             print("ScoreUp")
             score += 1
             scoreLabelNode.text = "Score:\(score)"
             
-            // ベストスコア更新か確認する --- ここから ---
-            var bestScore = userDefaults.integer(forKey: "BEST")
-            if score > bestScore {
-                bestScore = score
-                bestScoreLabelNode.text = "Best Score:\(bestScore)"
-                userDefaults.set(bestScore, forKey: "BEST")
-                userDefaults.synchronize()
-            } // --- ここまで追加---
+            // アイテムが消える
+            contact.bodyA.node?.removeFromParent()
+            
+            // アイテムを取得した時、音が鳴る
+            playsound()
             
         } else {
             // 壁か地面と衝突した
