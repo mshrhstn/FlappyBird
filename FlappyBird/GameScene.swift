@@ -32,8 +32,12 @@ class GameScene: SKScene , SKPhysicsContactDelegate , AVAudioPlayerDelegate {
     let scoreCategory: UInt32 = 1 << 3      // 0...01000
     let itemCategory: UInt32 = 1 << 4
     
+    
     // SKView上にシーンが表示されたときに呼ばれるメソッド
     override func didMove(to view: SKView) {
+        
+        //音の読み込み遅延をなくす
+        SKAction.playSoundFileNamed("coin", waitForCompletion: false)
         
         // 重力を設定
         physicsWorld.gravity = CGVector(dx: 0, dy: -4)
@@ -64,6 +68,7 @@ class GameScene: SKScene , SKPhysicsContactDelegate , AVAudioPlayerDelegate {
         }
     
     func playsound() { //音を鳴らすための関数
+        
         if let path = Bundle.main.path(forResource: "coin", ofType: "mp3") {
             do{
                 audioPlayer = try AVAudioPlayer(contentsOf: NSURL(fileURLWithPath: path) as URL, fileTypeHint: "mp3")
@@ -334,6 +339,7 @@ class GameScene: SKScene , SKPhysicsContactDelegate , AVAudioPlayerDelegate {
     
     func setupScoreLabel() {
         score = 0
+        itemScore = 0
         
         scoreLabelNode = SKLabelNode()
         scoreLabelNode.fontColor = UIColor.black
@@ -354,19 +360,21 @@ class GameScene: SKScene , SKPhysicsContactDelegate , AVAudioPlayerDelegate {
         itemScoreLabelNode.position = CGPoint(x: 10, y: self.frame.size.height - 120)
         itemScoreLabelNode.zPosition = 100 // 一番手前に表示する
         itemScoreLabelNode.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.left
+        itemScoreLabelNode.text = "Item:\(itemScore)"
+        self.addChild(itemScoreLabelNode)
 
         let bestScore = userDefaults.integer(forKey: "BEST")
         bestScoreLabelNode.text = "Best Score:\(bestScore)"
         self.addChild(bestScoreLabelNode)
         
-        let itemScore = userDefaults.integer(forKey: "ITEM")
-        itemScoreLabelNode.text = "Item Score:\(itemScore)"
-        self.addChild(itemScoreLabelNode)
+        
     }
     
     func restart() {
         score = 0
+        itemScore = 0
         scoreLabelNode.text = "Score:\(score)"
+        itemScoreLabelNode.text = "Item:\(itemScore)"
 
         bird.position = CGPoint(x: self.frame.size.width * 0.2, y:self.frame.size.height * 0.7)
         bird.physicsBody?.velocity = CGVector.zero
@@ -406,6 +414,20 @@ class GameScene: SKScene , SKPhysicsContactDelegate , AVAudioPlayerDelegate {
         score += 1
         scoreLabelNode.text = "Score:\(score)"
         
+        } else if (contact.bodyA.categoryBitMask & itemCategory) == itemCategory || (contact.bodyB.categoryBitMask & itemCategory) == itemCategory {
+        // アイテムと衝突した時のメソッド
+                
+        // スコア用の物体と衝突した
+        print("ScoreUp")
+        itemScore += 1
+        itemScoreLabelNode.text = "Item:\(itemScore)"
+                
+        // アイテムが消える
+        contact.bodyA.node?.removeFromParent()
+                
+        // アイテムを取得した時、音が鳴る
+        playsound()
+                
         // ベストスコア更新か確認する --- ここから ---
         var bestScore = userDefaults.integer(forKey: "BEST")
         if score > bestScore {
@@ -414,20 +436,6 @@ class GameScene: SKScene , SKPhysicsContactDelegate , AVAudioPlayerDelegate {
             userDefaults.set(bestScore, forKey: "BEST")
             userDefaults.synchronize()
         }
-                
-        } else if (contact.bodyA.categoryBitMask & itemCategory) == itemCategory || (contact.bodyB.categoryBitMask & itemCategory) == itemCategory {
-            // アイテムと衝突した時のメソッド
-            
-            // スコア用の物体と衝突した
-            print("ScoreUp")
-            score += 1
-            scoreLabelNode.text = "Score:\(score)"
-            
-            // アイテムが消える
-            contact.bodyA.node?.removeFromParent()
-            
-            // アイテムを取得した時、音が鳴る
-            playsound()
             
         } else {
             // 壁か地面と衝突した
